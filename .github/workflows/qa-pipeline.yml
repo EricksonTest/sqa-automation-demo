@@ -1,0 +1,150 @@
+name: QA quality gates
+
+on:
+  pull_request:
+  push:
+    branches: [master, main]
+  schedule:
+    - cron: "30 2 * * 1-5"
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: Suite to run
+        required: true
+        default: smoke
+        type: choice
+        options: [smoke, regression, e2e, all]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: qa-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  TEST_BASE_URL: https://automationintesting.online
+  HEADLESS: true
+  UI_TIMEOUT_SECONDS: 20
+
+jobs:
+  build:
+    name: Build and static quality gate
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: "**/*.csproj"
+      - run: dotnet restore --locked-mode
+      - run: dotnet build --configuration Release --no-restore
+
+  api-smoke:
+    name: API smoke gate
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: "**/*.csproj"
+      - run: dotnet restore --locked-mode
+      - name: Check system under test
+        run: curl --fail --retry 4 --retry-all-errors --max-time 20 "$TEST_BASE_URL/api/room"
+      - name: Run fast API checks
+        run: >-
+          dotnet test --configuration Release --no-restore
+          --filter "TestCategory=Api&TestCategory=Smoke"
+          --logger "trx;LogFileName=api-smoke.trx"
+          --results-directory TestResults/api
+      - name: Publish API evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: api-smoke-evidence
+          path: TestResults/api
+          if-no-files-found: warn
+          retention-days: 14
+
+  ui-smoke:
+    name: Headless Selenium smoke gate
+    needs: api-smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      BROWSER: chrome
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: "**/*.csproj"
+      - run: dotnet restore --locked-mode
+      - name: Run UI smoke checks
+        run: >-
+          dotnet test --configuration Release --no-restore
+          --filter "TestCategory=Ui&TestCategory=Smoke"
+          --logger "trx;LogFileName=ui-smoke.trx"
+          --results-directory TestResults/ui
+      - name: Publish UI diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: ui-smoke-evidence
+          path: |
+            TestResults/ui
+            artifacts
+          if-no-files-found: warn
+          retention-days: 14
+
+  scheduled-regression:
+    name: Scheduled regression and E2E
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      BROWSER: chrome
+    steps:
+      - uses: actions/checkout@v6
+      - uses: actions/setup-dotnet@v6
+        with:
+          global-json-file: global.json
+          cache: true
+          cache-dependency-path: "**/*.csproj"
+      - run: dotnet restore --locked-mode
+      - name: Select requested suite
+        id: suite
+        shell: bash
+        run: |
+          case "${{ inputs.suite || 'all' }}" in
+            smoke) echo 'filter=TestCategory=Smoke' >> "$GITHUB_OUTPUT" ;;
+            regression) echo 'filter=TestCategory=Regression' >> "$GITHUB_OUTPUT" ;;
+            e2e) echo 'filter=TestCategory=E2E' >> "$GITHUB_OUTPUT" ;;
+            all) echo 'filter=' >> "$GITHUB_OUTPUT" ;;
+          esac
+      - name: Run selected suite
+        run: >-
+          dotnet test --configuration Release --no-restore
+          ${{ steps.suite.outputs.filter && format('--filter "{0}"', steps.suite.outputs.filter) || '' }}
+          --logger "trx;LogFileName=regression.trx"
+          --results-directory TestResults/regression
+      - name: Publish regression evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: regression-evidence
+          path: |
+            TestResults/regression
+            artifacts
+          if-no-files-found: warn
+          retention-days: 30

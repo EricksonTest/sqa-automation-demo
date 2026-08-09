@@ -1,0 +1,18 @@
+**/bin/
+**/obj/
+.idea/
+.vs/
+.vscode/
+TestResults/
+artifacts/
+screenshots/
+*.trx
+*.user
+.DS_Store
+.tmp-presentation/
+
+# Local interview prep — not for the public repo
+docs/demo-runbook.md
+docs/interview-deck.md
+docs/jacobs-question-bank.md
+docs/Senior-QA-Automation-Interview.pptx
