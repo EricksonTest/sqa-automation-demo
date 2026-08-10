@@ -1,0 +1,45 @@
+// Copy into src/SeniorQaAutomation.Framework/TestData/ before writing tests that need new data.
+// Provide valid defaults; tests override only scenario-relevant fields via With* methods.
+// See docs/csharp-test-style-guide.md for conventions.
+
+using SeniorQaAutomation.Framework.Models;
+
+namespace SeniorQaAutomation.Framework.TestData;
+
+public sealed class EntityNameBuilder
+{
+    private int _id = 1;
+    private string _name = $"Test{Guid.NewGuid():N}"[..12];
+    private bool _isActive = true;
+
+    private EntityNameBuilder()
+    {
+    }
+
+    public static EntityNameBuilder CreateValid() => new();
+
+    public EntityNameBuilder WithId(int id)
+    {
+        _id = id;
+        return this;
+    }
+
+    public EntityNameBuilder WithName(string name)
+    {
+        _name = name;
+        return this;
+    }
+
+    public EntityNameBuilder WithActive(bool isActive)
+    {
+        _isActive = isActive;
+        return this;
+    }
+
+    public EntityName Build() => new()
+    {
+        Id = _id,
+        Name = _name,
+        IsActive = _isActive
+    };
+}

@@ -1,0 +1,47 @@
+---
+description: C# test automation conventions for NUnit API, UI, and E2E tests in this repository
+globs: tests/**/*.cs,src/SeniorQaAutomation.Framework/**/*.cs
+alwaysApply: false
+---
+
+# C# Test Automation Conventions
+
+Follow [docs/csharp-test-style-guide.md](../../docs/csharp-test-style-guide.md) when adding or changing tests.
+
+## Naming
+
+- Test methods: `Action_Condition_ExpectedOutcome`
+- Test classes: `{Feature}{Layer}Tests`
+- Tag every test with layer (`Api`, `Ui`, `E2E`) and purpose (`Smoke`, `Regression`, `Contract`) as appropriate
+
+## Layer rules
+
+- Default to API tests unless the risk is browser-specific (rendering, routing, interaction)
+- Use E2E only when cross-layer state must be proven
+- Never put locators or HTTP calls in test bodies — extend framework first
+
+## Framework-first workflow
+
+1. Add or extend API client, page object, or builder in `src/SeniorQaAutomation.Framework/`
+2. Then write a thin test in `tests/SeniorQaAutomation.Tests/`
+3. Copy from `docs/templates/*.cs.template` when starting a new file
+
+## Test data
+
+- Use `{Entity}Builder.CreateValid()` with fluent `With*` overrides
+- Never hard-code dates, IDs, or names in test bodies
+- Override only fields relevant to the scenario
+
+## Assertions and cleanup
+
+- Group related checks with `Assert.Multiple`
+- Happy path: `.EnsureSuccess()` then assert fields; negative path: assert `StatusCode` directly
+- Write assertion messages as behaviour statements, not technical labels
+- Track created resource IDs and delete in TearDown/finally; log cleanup failures without failing the test
+- Capture browser artifacts only on failure (see `UiTestBase`)
+
+## Anti-patterns
+
+- No `Thread.Sleep` — use explicit waits via `WaitHelper`
+- No secrets in logs or assertion messages
+- No custom assertion libraries beyond NUnit constraints

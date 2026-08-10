@@ -1,0 +1,40 @@
+// Copy into src/SeniorQaAutomation.Framework/PageObjects/ before writing UI tests.
+// Add locators and behaviour methods here — never in test bodies.
+// See docs/csharp-test-style-guide.md for conventions.
+
+using OpenQA.Selenium;
+
+namespace SeniorQaAutomation.Framework.PageObjects;
+
+public sealed class FeatureNamePage : PageObject
+{
+    private static readonly By KeyElement = By.CssSelector("[data-testid='KeyElement']");
+    private static readonly By ActionButton = By.CssSelector("[data-testid='ActionButton']");
+
+    public FeatureNamePage(IWebDriver driver, Uri baseUrl, TimeSpan timeout)
+        : base(driver, baseUrl, timeout)
+    {
+    }
+
+    public FeatureNamePage Open()
+    {
+        NavigateTo("/feature-path");
+        Wait.UntilVisible(KeyElement);
+        return this;
+    }
+
+    public FeatureNamePage DoSomething()
+    {
+        Wait.UntilClickable(ActionButton).Click();
+        Wait.UntilVisible(KeyElement);
+        return this;
+    }
+
+    public OtherPage DoSomethingThatNavigates()
+    {
+        Wait.UntilClickable(ActionButton).Click();
+        return new OtherPage(Driver, BaseUrl, Timeout).WaitUntilLoaded();
+    }
+
+    public string ExpectedText => Wait.UntilVisible(KeyElement).Text.Trim();
+}

@@ -1,0 +1,85 @@
+// Copy into tests/SeniorQaAutomation.Tests/Api/ when adding API coverage.
+// Replace FeatureName, endpoint calls, and assertions for your scenario.
+// See docs/csharp-test-style-guide.md for conventions.
+
+using System.Net;
+using NUnit.Framework;
+using SeniorQaAutomation.Framework.Api;
+using SeniorQaAutomation.Framework.Configuration;
+using SeniorQaAutomation.Framework.Models;
+using SeniorQaAutomation.Framework.TestData;
+
+namespace SeniorQaAutomation.Tests.Api;
+
+[TestFixture]
+[NonParallelizable] // Remove when running against an isolated SUT that supports parallel mutation.
+[Category("Api")]
+public sealed class FeatureNameApiTests
+{
+    private readonly List<int> _resourcesToDelete = [];
+    private HttpClient _httpClient = null!;
+    private BookingApiClient _client = null!;
+
+    [SetUp]
+    public void SetUp()
+    {
+        _httpClient = new HttpClient { Timeout = TimeSpan.FromSeconds(30) };
+        _client = new BookingApiClient(_httpClient, TestSettings.FromEnvironment());
+    }
+
+    [TearDown]
+    public async Task TearDown()
+    {
+        foreach (var resourceId in _resourcesToDelete)
+        {
+            try
+            {
+                await _client.DeleteBookingAsync(resourceId);
+            }
+            catch (ApiClientException exception)
+            {
+                TestContext.Progress.WriteLine($"Cleanup failed for resource {resourceId}: {exception.Message}");
+            }
+        }
+
+        _resourcesToDelete.Clear();
+        _httpClient.Dispose();
+    }
+
+    [Test]
+    [Category("Smoke")]
+    public async Task ActionName_WithValidData_ReturnsExpectedOutcome()
+    {
+        var requested = BookingBuilder.CreateValid().Build();
+
+        var response = await _client.CreateBookingAsync(requested);
+        var created = response.EnsureSuccess();
+        TrackForCleanup(created.BookingId);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.Created));
+            Assert.That(created.BookingId, Is.GreaterThan(0));
+        });
+    }
+
+    [Test]
+    [Category("Regression")]
+    public async Task ActionName_WithInvalidInput_ReturnsExpectedError()
+    {
+        var invalid = BookingBuilder.CreateValid().Build() with { FirstName = string.Empty };
+
+        var response = await _client.CreateBookingAsync(invalid);
+
+        Assert.That(response.StatusCode, Is.EqualTo(HttpStatusCode.BadRequest));
+    }
+
+    private async Task<CreatedBooking> CreateAndTrackAsync(Booking booking)
+    {
+        var created = (await _client.CreateBookingAsync(booking)).EnsureSuccess();
+        TrackForCleanup(created.BookingId);
+        return created;
+    }
+
+    private void TrackForCleanup(int resourceId) => _resourcesToDelete.Add(resourceId);
+}

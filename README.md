@@ -158,9 +158,11 @@ tests/SeniorQaAutomation.Tests/
 └── E2E/             API-created state verified through Selenium
 
 docs/
+├── csharp-test-style-guide.md
 ├── interview-deck.md
 ├── demo-runbook.md
 ├── jacobs-question-bank.md
+├── templates/              copy-paste starters for new tests and framework code
 └── test-strategy.md
 ```
 
@@ -174,6 +176,7 @@ the rest of a one-hour interview for technical discussion:
 - [Live demo runbook and fallback plan](docs/demo-runbook.md)
 - [Senior QA question bank](docs/jacobs-question-bank.md)
 - [Risk-based test strategy and role traceability](docs/test-strategy.md)
+- [C# test style guide and reusable patterns](docs/csharp-test-style-guide.md)
 
 The demo is evidence for the engineering story, not the whole story. The strongest
 discussion points are test-layer choice, deterministic setup, diagnostics, fast PR

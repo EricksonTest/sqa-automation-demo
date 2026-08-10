@@ -3,6 +3,10 @@
 This is a compact demonstration framework, so each change should make its test
 intent clearer, its feedback faster, or its failure evidence more useful.
 
+Read the [C# test style guide](docs/csharp-test-style-guide.md) before adding tests.
+Copy starter files from [`docs/templates/`](docs/templates/) when creating new API, UI,
+E2E, page object, or builder code.
+
 ## Working agreement
 
 1. Create a small branch from `main` and describe the risk or behaviour under test.
@@ -10,8 +14,8 @@ intent clearer, its feedback faster, or its failure evidence more useful.
 3. Prefer API coverage to UI coverage unless the risk exists specifically in the UI.
 4. Use builders with valid defaults and vary only data relevant to the scenario.
 5. Do not use fixed sleeps. Use explicit conditions with bounded timeouts.
-6. Tag tests with their layer (`Api`, `Ui`, or `E2E`) and purpose (`Smoke` or
-   `Regression`).
+6. Name tests `Action_Condition_ExpectedOutcome` and tag them with their layer
+   (`Api`, `Ui`, or `E2E`) and purpose (`Smoke`, `Regression`, or `Contract`).
 7. Include useful failure context without logging credentials or personal data.
 8. Run `dotnet build --configuration Release` and `./scripts/run-smoke.sh` before a PR.
 

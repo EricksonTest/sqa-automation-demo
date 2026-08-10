@@ -1,0 +1,43 @@
+// Copy into tests/SeniorQaAutomation.Tests/Ui/ when adding browser coverage.
+// Extend UiTestBase for driver lifecycle and failure diagnostics.
+// See docs/csharp-test-style-guide.md for conventions.
+
+using NUnit.Framework;
+using SeniorQaAutomation.Framework.PageObjects;
+
+namespace SeniorQaAutomation.Tests.Ui;
+
+[TestFixture]
+[Category("Ui")]
+public sealed class FeatureNameUiTests : UiTestBase
+{
+    [Test]
+    [Category("Smoke")]
+    public void ActionName_UnderCondition_ShowsExpectedOutcome()
+    {
+        var page = new HomePage(Driver, Settings.BaseUrl, Settings.UiTimeout)
+            .Open();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(() => page.BrandName, Is.Not.Empty,
+                "Expected the configured hotel brand to be displayed.");
+            Assert.That(() => page.HasRooms, Is.True,
+                "Expected at least one bookable room to be displayed.");
+        });
+    }
+
+    [Test]
+    [Category("Regression")]
+    public void ActionName_WithInvalidInput_ShowsValidationFeedback()
+    {
+        var page = new HomePage(Driver, Settings.BaseUrl, Settings.UiTimeout)
+            .Open()
+            .SubmitEmptyContactForm();
+
+        Assert.That(
+            () => page.ContactValidationErrors,
+            Is.Not.Empty,
+            "Expected server-side validation feedback for an empty contact message.");
+    }
+}
