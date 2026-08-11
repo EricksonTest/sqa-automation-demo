@@ -39,6 +39,7 @@ Categories are a **risk and execution filter**, not decoration:
 | `Smoke` | High-impact, fast gate | PR / pre-push |
 | `Regression` | Broader functional coverage | Scheduled / manual |
 | `Contract` | Schema/shape validation | API response structure checks |
+| `Evidence` | Passing negative UI state with an attached screenshot | Manual interview evidence run |
 
 A test can carry both a layer tag and a purpose tag (for example `[Category("Api")]` and `[Category("Smoke")]`).
 

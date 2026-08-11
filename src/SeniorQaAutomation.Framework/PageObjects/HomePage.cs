@@ -34,7 +34,10 @@ public sealed class HomePage : PageObject
         var name = Wait.UntilVisible(ContactName);
         ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", name);
         Wait.UntilClickable(ContactSubmit).Click();
-        Wait.UntilVisible(ContactErrors);
+        var firstError = Wait.UntilVisible(ContactErrors);
+        ((IJavaScriptExecutor)Driver).ExecuteScript(
+            "arguments[0].scrollIntoView({block: 'center'});",
+            firstError);
         return this;
     }
 

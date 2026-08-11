@@ -12,6 +12,19 @@ public abstract class UiTestBase
 
     protected TestSettings Settings { get; private set; } = null!;
 
+    protected void AttachEvidenceScreenshot(string label)
+    {
+        var configuredDirectory = Environment.GetEnvironmentVariable("TEST_ARTIFACTS_DIR");
+        var outputDirectory = string.IsNullOrWhiteSpace(configuredDirectory)
+            ? Path.Combine(TestContext.CurrentContext.WorkDirectory, "artifacts", "evidence")
+            : Path.GetFullPath(configuredDirectory);
+        var evidenceName = $"{TestContext.CurrentContext.Test.Name}-{label}";
+        var screenshot = BrowserDiagnostics.CaptureScreenshot(Driver, outputDirectory, evidenceName);
+
+        TestContext.AddTestAttachment(screenshot, $"Expected UI state: {label}");
+        TestContext.Progress.WriteLine($"Evidence screenshot: {screenshot}");
+    }
+
     [SetUp]
     public void StartBrowser()
     {

@@ -20,6 +20,7 @@ public sealed class AdminLoginTests : UiTestBase
     }
 
     [Test]
+    [Category("Evidence")]
     public void AdminLogin_ShowsFeedbackForInvalidCredentials()
     {
         var loginPage = new AdminLoginPage(Driver, Settings.BaseUrl, Settings.UiTimeout)
@@ -27,5 +28,6 @@ public sealed class AdminLoginTests : UiTestBase
             .LoginExpectingFailure("not-a-real-user", "not-a-real-password");
 
         Assert.That(() => loginPage.ErrorMessage, Does.Contain("Invalid credentials"));
+        AttachEvidenceScreenshot("invalid-credentials-rejected");
     }
 }

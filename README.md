@@ -103,12 +103,21 @@ dotnet test --filter "TestCategory=Ui"
 # Flagship integration journey
 dotnet test --filter "TestCategory=E2E"
 
+# Passing negative scenarios with expected-state screenshots
+dotnet test --filter "TestCategory=Evidence"
+
 # Wider behavioural coverage
 dotnet test --filter "TestCategory=Regression"
 ```
 
 NUnit categories are deliberately orthogonal: a check can describe both its layer
 (`Api`, `Ui`, `E2E`) and its delivery purpose (`Smoke`, `Regression`).
+
+`Evidence` scenarios are a deliberate exception to failure-only screenshot capture.
+They verify that invalid input is rejected correctly, then attach a screenshot of the
+expected error state while the test remains green. Select `evidence` from the manual
+GitHub Actions workflow to publish those screenshots alongside the TRX result. Normal
+UI and E2E tests still capture browser diagnostics only when they fail.
 
 ## Configuration
 
