@@ -5,16 +5,25 @@ namespace SeniorQaAutomation.Framework.Ui;
 
 public static class BrowserDiagnostics
 {
+    public static string CaptureScreenshot(
+        IWebDriver driver,
+        string outputDirectory,
+        string evidenceName)
+    {
+        ArgumentNullException.ThrowIfNull(driver);
+        Directory.CreateDirectory(outputDirectory);
+
+        var path = Path.ChangeExtension(CreatePrefix(outputDirectory, evidenceName), ".png");
+        ((ITakesScreenshot)driver).GetScreenshot().SaveAsFile(path);
+        return path;
+    }
+
     public static IReadOnlyList<string> Capture(IWebDriver driver, string outputDirectory, string testName)
     {
         ArgumentNullException.ThrowIfNull(driver);
         Directory.CreateDirectory(outputDirectory);
 
-        var safeName = string.Concat(testName.Select(character =>
-            Path.GetInvalidFileNameChars().Contains(character) ? '_' : character));
-        var prefix = Path.Combine(
-            outputDirectory,
-            $"{safeName}-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmssfff}");
+        var prefix = CreatePrefix(outputDirectory, testName);
         var artifacts = new List<string>();
 
         TryCapture(Path.ChangeExtension(prefix, ".png"), artifacts, path =>
@@ -44,6 +53,15 @@ public static class BrowserDiagnostics
         });
 
         return artifacts;
+    }
+
+    private static string CreatePrefix(string outputDirectory, string name)
+    {
+        var safeName = string.Concat(name.Select(character =>
+            Path.GetInvalidFileNameChars().Contains(character) ? '_' : character));
+        return Path.Combine(
+            outputDirectory,
+            $"{safeName}-{DateTimeOffset.UtcNow:yyyyMMdd-HHmmssfff}");
     }
 
     private static void TryCapture(string path, ICollection<string> artifacts, Action<string> capture)

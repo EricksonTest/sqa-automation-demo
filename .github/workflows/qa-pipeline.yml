@@ -3,7 +3,7 @@ name: QA quality gates
 on:
   pull_request:
   push:
-    branches: [master, main]
+    branches: [SQA, master, main]
   schedule:
     - cron: "30 2 * * 1-5"
   workflow_dispatch:
@@ -13,7 +13,7 @@ on:
         required: true
         default: smoke
         type: choice
-        options: [smoke, regression, e2e, all]
+        options: [smoke, regression, evidence, e2e, all]
 
 permissions:
   contents: read
@@ -81,6 +81,7 @@ jobs:
     timeout-minutes: 15
     env:
       BROWSER: chrome
+      TEST_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/ui
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v6
@@ -106,14 +107,15 @@ jobs:
           if-no-files-found: warn
           retention-days: 14
 
-  scheduled-regression:
-    name: Scheduled regression and E2E
+  extended-suite:
+    name: Scheduled regression or selected manual suite
     if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 30
     env:
       BROWSER: chrome
+      TEST_ARTIFACTS_DIR: ${{ github.workspace }}/artifacts/extended
     steps:
       - uses: actions/checkout@v6
       - uses: actions/setup-dotnet@v6
@@ -129,6 +131,7 @@ jobs:
           case "${{ inputs.suite || 'all' }}" in
             smoke) echo 'filter=TestCategory=Smoke' >> "$GITHUB_OUTPUT" ;;
             regression) echo 'filter=TestCategory=Regression' >> "$GITHUB_OUTPUT" ;;
+            evidence) echo 'filter=TestCategory=Evidence' >> "$GITHUB_OUTPUT" ;;
             e2e) echo 'filter=TestCategory=E2E' >> "$GITHUB_OUTPUT" ;;
             all) echo 'filter=' >> "$GITHUB_OUTPUT" ;;
           esac
@@ -142,7 +145,7 @@ jobs:
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: regression-evidence
+          name: extended-suite-evidence
           path: |
             TestResults/regression
             artifacts

@@ -8,6 +8,7 @@ namespace SeniorQaAutomation.Tests.Ui;
 public sealed class ContactValidationTests : UiTestBase
 {
     [Test]
+    [Category("Evidence")]
     public void ContactForm_ShowsValidationErrorsWhenRequiredFieldsAreEmpty()
     {
         var homePage = new HomePage(Driver, Settings.BaseUrl, Settings.UiTimeout)
@@ -18,5 +19,6 @@ public sealed class ContactValidationTests : UiTestBase
             () => homePage.ContactValidationErrors,
             Is.Not.Empty,
             $"Expected server-side validation feedback for an empty contact message.");
+        AttachEvidenceScreenshot("required-field-validation");
     }
 }

@@ -144,6 +144,10 @@ dotnet test tests/SeniorQaAutomation.Tests/SeniorQaAutomation.Tests.csproj \
 
 dotnet test tests/SeniorQaAutomation.Tests/SeniorQaAutomation.Tests.csproj \
   --filter 'TestCategory=E2E'
+
+# Passing negative scenarios with expected-state screenshots
+dotnet test tests/SeniorQaAutomation.Tests/SeniorQaAutomation.Tests.csproj \
+  --filter 'TestCategory=Evidence'
 ```
 
 Filters must be confirmed with `dotnet test --list-tests` whenever categories or adapters change.
@@ -153,6 +157,7 @@ Filters must be confirmed with `dotnet test --list-tests` whenever categories or
 | Local development | Relevant test or category | Fast implementation feedback | Developer resolves failures before push |
 | Pull request/push | Build plus `Smoke`/fast selected checks as defined in workflow | Protect mainline with timely signal | Required checks pass; no unexpected skip |
 | Scheduled/manual | `Regression`, broader `Api`/`Ui`, and `E2E` as defined | Detect wider or environment-dependent regressions | Failure investigated with retained evidence |
+| Manual evidence | `Evidence` | Prove expected rejection and validation states visually | Tests pass and expected-state screenshots are attached |
 | Pre-interview demo | `./scripts/run-demo.sh` | One rehearsed, visible scenario | Hard stop/fallback in `demo-runbook.md` |
 
 The source of truth for CI behaviour is `.github/workflows/qa-pipeline.yml`; documentation must not promise triggers or jobs absent from that file.
