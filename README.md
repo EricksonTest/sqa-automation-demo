@@ -1,4 +1,4 @@
-# Senior QA Automation Demo
+# Restful Booked Platform (undertest)
 
 A compact, interview-ready quality engineering portfolio built with **C#**, **.NET**,
 **NUnit**, **HttpClient**, **Selenium 4**, and **GitHub Actions**. It validates the
