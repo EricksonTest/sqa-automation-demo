@@ -1,4 +1,4 @@
-# Restful Booked Platform (undertest)
+# Restful Booker Platform (undertest)
 
 A compact, interview-ready quality engineering portfolio built with **C#**, **.NET**,
 **NUnit**, **HttpClient**, **Selenium 4**, and **GitHub Actions**. It validates the
