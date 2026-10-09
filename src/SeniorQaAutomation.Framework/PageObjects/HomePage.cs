@@ -33,7 +33,12 @@ public sealed class HomePage : PageObject
     {
         var name = Wait.UntilVisible(ContactName);
         ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", name);
-        Wait.UntilClickable(ContactSubmit).Click();
+        
+        var submitButton = Wait.UntilClickable(ContactSubmit);
+        ((IJavaScriptExecutor)Driver).ExecuteScript("arguments[0].scrollIntoView({block: 'center'});", submitButton);
+        
+        submitButton.Click();
+        
         var firstError = Wait.UntilVisible(ContactErrors);
         ((IJavaScriptExecutor)Driver).ExecuteScript(
             "arguments[0].scrollIntoView({block: 'center'});",
